@@ -8,7 +8,7 @@
 (function () {
   "use strict";
 
-  const CARD_VERSION = "1.1.13";
+  const CARD_VERSION = "1.1.13-local.1";
 
   const PATTERNS = {
     battery: "sensor.{p}battery",
@@ -1714,14 +1714,14 @@
       if (car.images || car.image || car.image_side) return;   // explicit config wins
       const dir = /3/.test(String(car.model || "")) ? "3" : "y";
       const paint = String(car.paint || "").toLowerCase().replace(/[^a-z]/g, "");
-      // /local first: a pack in /config/www/tesla-fleet-card/ always wins.
-      // Then the repo itself over GitHub raw - always current, updates on a
-      // plain push. hacsfiles LAST: HACS only manages the JS file for
-      // dashboard plugins and never updates or removes an images tree it once
-      // laid down, so anything found there is likely stale.
-      const REPO_ROOTS = ["https://raw.githubusercontent.com/MrNickIE/tesla-fleet-homeassistant/main/images/",
+      // Local fork: images are served only from this Home Assistant, never
+      // fetched from GitHub. /local first (copy the repo's images/ tree to
+      // /config/www/tesla-fleet-card/images/), then hacsfiles. The /local
+      // root also counts as a repo root so the generation check still applies
+      // to the shipped packs copied there.
+      const REPO_ROOTS = ["/local/tesla-fleet-card/images/",
                           "/hacsfiles/tesla-fleet-homeassistant/images/"];
-      const roots = ["/local/tesla-fleet-card/images/", REPO_ROOTS[0], REPO_ROOTS[1]];
+      const roots = [REPO_ROOTS[0], REPO_ROOTS[1]];
       /* A generation-qualified pack wins if one exists, so dropping
          images/models/y-juniper/red/app into the repo or into /local is all it
          takes to fix a Juniper red Y. The unqualified path stays as the
